@@ -5,6 +5,7 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"io"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
@@ -70,7 +71,7 @@ func isAuthorized(next http.Handler) http.Handler {
 }
 
 func getVersion(w http.ResponseWriter, r *http.Request) {
-	version, err := os.ReadFile(versionFile)
+	version, err := ioutil.ReadFile(versionFile)
 	if err != nil {
 		http.Error(w, `{"error": "Version file not found"}`, http.StatusNotFound)
 		return
@@ -108,7 +109,7 @@ func updateVersion(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := os.WriteFile(versionFile, []byte(newVersion), 0644); err != nil {
+	if err := ioutil.WriteFile(versionFile, []byte(newVersion), 0644); err != nil {
 		http.Error(w, `{"error": "Failed to update version"}`, http.StatusInternalServerError)
 		return
 	}
@@ -121,7 +122,7 @@ func updateVersion(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
-	token, err := os.ReadFile(authTokenFile)
+	token, err := ioutil.ReadFile(authTokenFile)
 	if err != nil {
 		log.Println("Warning: Authentication token file not found. API will be unprotected!")
 		authToken = ""
