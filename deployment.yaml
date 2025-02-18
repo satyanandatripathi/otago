@@ -1,0 +1,54 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: go-api-deployment
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: go-api
+  template:
+    metadata:
+      labels:
+        app: go-api
+    spec:
+      containers:
+      - name: go-api-container
+        image: my-go-api:1.0
+        ports:
+        - containerPort: 5000
+        env:
+        - name: AUTH_TOKEN
+          valueFrom:
+            secretKeyRef:
+              name: go-api-secrets
+              key: authToken
+        volumeMounts:
+        - name: firmware-volume
+          mountPath: /app/firmware.bin
+          subPath: firmware.bin
+        - name: version-volume
+          mountPath: /app/version.txt
+          subPath: version.txt
+        - name: auth-token-volume
+          mountPath: /app/auth_token.txt
+          subPath: auth_token.txt
+      volumes:
+      - name: firmware-volume
+        configMap:
+          name: go-api-config
+          items:
+          - key: firmware.bin
+            path: firmware.bin
+      - name: version-volume
+        configMap:
+          name: go-api-config
+          items:
+          - key: version.txt
+            path: version.txt
+      - name: auth-token-volume
+        secret:
+          secretName: go-api-secrets
+          items:
+          - key: auth_token.txt
+            path: auth_token.txt
